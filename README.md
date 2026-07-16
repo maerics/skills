@@ -26,13 +26,11 @@ or `.claude/skills/` inside a project (that project only). Install a single
 skill by cloning this repo and symlinking (or copying) the skill directory:
 
 ```sh
-git clone https://github.com/maerics/skills.git ~/src/skills
-
 # Personal — available in every project:
 mkdir -p ~/.claude/skills
 ln -s ~/src/skills/okf ~/.claude/skills/okf
 
-# …or per-project — available in one repo only:
+# ... or per-project — available in one repo only:
 mkdir -p .claude/skills
 ln -s ~/src/skills/okf .claude/skills/okf
 ```
