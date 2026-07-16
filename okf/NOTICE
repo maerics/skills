@@ -1,0 +1,14 @@
+OKF specification (SPEC.md)
+===========================
+
+SPEC.md in this directory is the Open Knowledge Format specification,
+reproduced verbatim from Google Cloud's reference repository:
+
+  https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md
+
+Copyright Google LLC.
+Licensed under the Apache License, Version 2.0 (see LICENSE in this directory).
+
+SPEC.md is unmodified. All other files in this repository (SKILL.md,
+READMEs) are original work and are covered by the repository's top-level
+LICENSE.
