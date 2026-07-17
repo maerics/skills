@@ -47,9 +47,12 @@ tool that reads that convention can consume these skills the same way.
 
 ## Using the okf skill
 
-By default it **reads** knowledge from an `okf/` or `.okf/` directory; on
-explicit request it **writes** — bootstrapping a new bundle or reconciling an
-existing one against reality. See [okf/SKILL.md](okf/SKILL.md).
+By default it **reads** knowledge from a `.okf/` directory (any other name
+must be given explicitly); on explicit request it **writes** — bootstrapping
+a new bundle or reconciling an existing one against reality. Independent
+modules (apps, services, libraries) are encouraged to keep their own
+co-located bundle rather than relying on a single one at the repo root. See
+[okf/SKILL.md](okf/SKILL.md).
 
 ## Licensing
 
