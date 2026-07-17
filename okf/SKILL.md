@@ -151,9 +151,30 @@ If the repo is not under git, skip the git comparisons and rely on
 - [ ] Unknown pre-existing frontmatter keys preserved.
 - [ ] Broad updates: recency gate applied first; current subtrees left
       untouched.
+- [ ] Bundle validates cleanly (see Validation below).
+
+## Validation
+
+After bootstrapping or updating a bundle, or whenever asked to check/lint
+one, confirm it against SPEC.md and the conventions above with the
+validator script bundled in this skill:
+
+```sh
+go run <skill-base-dir>/scripts <bundle-path>
+```
+
+`<skill-base-dir>` is this skill's own directory (wherever it's installed —
+`~/.claude/skills/okf`, a project's `.claude/skills/okf`, or this source
+repo). The script is stdlib-only Go, so `go run` needs nothing beyond a Go
+toolchain: no build step, no dependencies to fetch. It prints a JSON report
+(`conformant`, `counts`, `findings`) and exits non-zero when the bundle has
+SPEC violations (errors) or, with `-strict`, when it merely has
+house-convention warnings (unrelated to genuine SPEC conformance). Each
+finding cites the SPEC section it's based on.
 
 ## Reference
 
 - [SPEC.md](SPEC.md) — the full OKF v0.1 specification (authoritative).
 - Terminology, conformance, citations, and versioning all live in SPEC.md;
   consult it rather than guessing.
+- [scripts/](scripts/) — the bundle validator invoked above.

@@ -1,0 +1,5 @@
+---
+title: No Type
+---
+
+Body.
