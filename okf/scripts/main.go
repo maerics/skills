@@ -1,12 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
-	"os/exec"
 )
 
 func main() {
@@ -44,17 +42,6 @@ func main() {
 	}
 	out = append(out, '\n')
 
-	printResult(out)
+	os.Stdout.Write(out)
 	os.Exit(exitCode(result, *strict))
-}
-
-// printResult prints data (a JSON document) piped through jq for pretty
-// printing, falling back to a plain print if jq is unavailable or fails.
-func printResult(data []byte) {
-	cmd := exec.Command("jq", ".")
-	cmd.Stdin = bytes.NewReader(data)
-	cmd.Stdout = os.Stdout
-	if err := cmd.Run(); err != nil {
-		fmt.Print(string(data))
-	}
 }
