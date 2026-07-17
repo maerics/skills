@@ -13,8 +13,8 @@ description: >-
 OKF represents knowledge as a directory of markdown files with YAML
 frontmatter — no schema registry, no tooling required. The full,
 authoritative rules are in [SPEC.md](SPEC.md); read it before writing a
-bundle. This skill defines two operating modes: **read** (default) and
-**write** (on request).
+bundle. This skill has exactly two operating modes: **read** (default)
+and **write** (everything else).
 
 A bundle is a tree of concept documents. Reserved filenames: `index.md`
 (directory listing) and `log.md` (update history). Every other `.md` file
@@ -71,10 +71,11 @@ or references project knowledge. Do **not** slurp the whole tree.
    sources; surface them when they back a claim.
 4. Treat a broken link as not-yet-written knowledge, not an error.
 
-## Write mode (on request only)
+## Write mode (everything else)
 
-Never write a bundle unless explicitly asked. First determine state, then
-pick one path:
+Any ask that isn't answerable by reading falls here — including bootstrap,
+update, and reconcile requests. Determine state and pick one path
+yourself; don't ask the user to choose between bootstrap and update:
 
 ### A. Bootstrap (no bundle exists)
 
