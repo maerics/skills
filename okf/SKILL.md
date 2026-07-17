@@ -66,26 +66,44 @@ pick one path:
    `okf_version: "0.1"`), plus per-directory `index.md` files.
 6. Write `log.md` with today's date and an `**Initialization**` entry.
 
-### B. Update (bundle exists) — apply the recency gate first
+### B. Update (bundle exists)
 
-Before re-deriving anything, decide whether the bundle is already current:
+First classify the ask:
 
-1. Read the newest date heading in the relevant `log.md`.
-2. Check git history for the bundle path: `git log -1 --format=%cd
-   --date=short -- <bundle-path>` and compare against changes to the source
-   it describes (e.g. `git log -1 --date=short -- <source-path>`).
-3. **If the bundle was reconciled at or after the last material change to
-   reality** (log date is recent and ≥ the source's last change), it is
-   current: apply only the specific edit the user asked for, or report that
-   nothing needs doing. Do not rebuild.
-4. **Otherwise reconcile**: update the concept docs whose subjects changed,
-   preserve unknown frontmatter keys when round-tripping (§4.1), refresh the
-   affected `index.md` entries, bump each touched concept's `timestamp`, and
-   append a dated `log.md` entry (`**Update**`, `**Creation**`,
-   `**Deprecation**`) describing what changed.
+- **Targeted** (user names a specific concept, resource, or change): skip
+  the gate below entirely. Locate or create that one concept, check only
+  its own `timestamp` (or its directory's `log.md`) against the resource it
+  describes, and write it. Nothing else needs to be opened.
+- **Broad** ("reconcile", "is this up to date", "sync the bundle", or
+  similar with no named target): apply the recency gate.
 
-If the repo is not under git, rely on `log.md` dates and the `timestamp`
-fields alone for the recency judgment.
+**Recency gate** (broad asks only) — walk the bundle top-down, one
+directory at a time, so cost scales with what's actually stale, not with
+bundle size:
+
+1. At each directory, read its nearest `log.md` heading date (log.md MAY
+   exist at any level — §7). No `log.md` at that level counts as unknown:
+   treat it as stale and descend.
+2. Compare that date against the last material change to what the
+   directory's concepts describe:
+   - If a concept maps to a path in this repo, compare with `git log -1
+     --date=short -- <source-path>`.
+   - If a concept has no git-trackable source (an external resource, a
+     process, a third-party system), there is no cheap way to verify —
+     trust its own `timestamp`/`log.md` history rather than forcing a
+     rewrite you can't actually check.
+3. **If the directory's log date is ≥ every checked source's last change,
+   it is current: prune.** Do not open its concept files, do not descend
+   into its subdirectories, and don't mention it in the report.
+4. **Otherwise, descend and reconcile only that subtree**: update the
+   concept docs whose subjects changed, preserve unknown frontmatter keys
+   when round-tripping (§4.1), refresh that directory's `index.md`, bump
+   each touched concept's `timestamp`, and append a dated entry
+   (`**Update**`, `**Creation**`, `**Deprecation**`) to that directory's
+   `log.md`.
+
+If the repo is not under git, skip the git comparisons and rely on
+`log.md` dates and `timestamp` fields alone throughout.
 
 ### Write checklist
 
@@ -94,6 +112,8 @@ fields alone for the recency judgment.
 - [ ] Affected `index.md` files reflect current contents.
 - [ ] `log.md` has a dated entry for this change.
 - [ ] Unknown pre-existing frontmatter keys preserved.
+- [ ] Broad updates: recency gate applied first; current subtrees left
+      untouched.
 
 ## Reference
 
