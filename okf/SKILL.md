@@ -177,4 +177,5 @@ finding cites the SPEC section it's based on.
 - [SPEC.md](SPEC.md) — the full OKF v0.1 specification (authoritative).
 - Terminology, conformance, citations, and versioning all live in SPEC.md;
   consult it rather than guessing.
-- [scripts/](scripts/) — the bundle validator invoked above.
+- [scripts/README.md](scripts/README.md) — the bundle validator invoked
+  above: full check list, output shape, exit codes.
