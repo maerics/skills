@@ -1,0 +1,20 @@
+#!/bin/sh
+# Entrypoint for the OKF bundle validator: works from any caller cwd and
+# regardless of where this skill is installed.
+set -eu
+dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+callerpwd=$(pwd)
+
+flags=""
+path=""
+for a in "$@"; do
+  case "$a" in
+    -*) flags="$flags $a" ;;
+    /*) path="$a" ;;
+    *) path="$callerpwd/$a" ;;
+  esac
+done
+: "${path:=$callerpwd}"
+
+cd -- "$dir"
+exec go run . $flags "$path"

@@ -8,7 +8,7 @@ no build step.
 ## Usage
 
 ```
-go run . [-strict] [bundle-path]
+./validate [-strict] [bundle-path]
 
 Arguments:
   bundle-path    Bundle root, or a directory containing .okf/. Defaults to ".".
@@ -17,8 +17,10 @@ Flags:
   -strict        Also fail (nonzero exit) when warnings are present.
 ```
 
-Run from this directory (`okf/scripts/`), or point `go run` at it from
-anywhere: `go run <skill-base-dir>/scripts <bundle-path>`.
+`validate` is a shell wrapper around `go run .` that resolves its own
+location, so it works from anywhere: `<skill-base-dir>/scripts/validate
+<bundle-path>`. Equivalent without the wrapper: `go run .` from this
+directory, or `go run <skill-base-dir>/scripts <bundle-path>` from anywhere.
 
 ## Output
 

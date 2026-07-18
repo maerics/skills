@@ -137,12 +137,14 @@ one, confirm it against SPEC.md and the conventions above with the
 validator script bundled in this skill:
 
 ```sh
-go run <skill-base-dir>/scripts <bundle-path>
+<skill-base-dir>/scripts/validate [-strict] <bundle-path>
 ```
 
 `<skill-base-dir>` is this skill's own directory (wherever it's installed —
 `~/.claude/skills/okf`, a project's `.claude/skills/okf`, or this source
-repo). Stdlib-only Go, so `go run` needs just a Go toolchain. It prints a JSON report
+repo). `validate` is a thin shell wrapper around `go run .`, so it works
+from any working directory and needs nothing but a Go toolchain — no build
+step, no dependencies to fetch. It prints a JSON report
 (`conformant`, `counts`, `findings`) and exits non-zero when the bundle has
 SPEC violations (errors) or, with `-strict`, when it merely has
 house-convention warnings (unrelated to genuine SPEC conformance). Each
