@@ -75,7 +75,8 @@ yourself; don't ask the user to choose between bootstrap and update:
    subdirectories that fit the domain.
 3. Each concept: required `type`; recommended `title`, `description`,
    `resource` (when it maps to a real asset), `tags`, and `timestamp`
-   (ISO 8601). Favor structured markdown (tables, `# Schema`, `# Examples`).
+   (RFC 3339, e.g. `2006-01-02T15:04:05-07:00`). Favor structured markdown
+   (tables, `# Schema`, `# Examples`).
 4. Cross-link with relative links (`../tables/orders.md`, `./orders.md`) —
    see Cross-linking above.
 5. Write a root `index.md` (frontmatter allowed **only** here):
