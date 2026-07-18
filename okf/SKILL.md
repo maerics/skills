@@ -10,11 +10,9 @@ description: >-
 
 # OKF: Open Knowledge Format
 
-OKF represents knowledge as a directory of markdown files with YAML
-frontmatter — no schema registry, no tooling required. The full,
-authoritative rules are in [SPEC.md](SPEC.md); read it before writing a
-bundle. This skill has exactly two operating modes: **read** (default)
-and **write** (everything else).
+The full, authoritative rules are in [SPEC.md](SPEC.md); read it before
+writing a bundle. This skill has exactly two operating modes: **read**
+(default) and **write** (everything else).
 
 A bundle is a tree of concept documents. Reserved filenames: `index.md`
 (directory listing) and `log.md` (update history). Every other `.md` file
@@ -24,39 +22,28 @@ missing index files (SPEC §9).
 
 ## Locating a bundle
 
-The `.okf/` dir is autodetected, named or inferred locations follow.
+If the user names a path, use it. Otherwise search **nearest-first**: a
+co-located `.okf/` in the directory the task concerns (independent
+modules — apps, services, libraries — are encouraged to keep their own
+bundle so knowledge travels with the code it describes), then walk
+upward to a `.okf/` at the repository root.
 
-Search **nearest-first**, unless the user names a path:
+Treat multiple bundles as fully independent — don't mix concepts or
+links across them, and note which bundle(s) you consulted.
 
-1. A co-located `.okf/` in the module/component/directory the current task
-   concerns. Independent modules — apps, services, libraries — are
-   encouraged to keep their own bundle so knowledge stays local to the code
-   it describes and travels with it through moves and refactors.
-2. Walking upward, a `.okf/` at the repository root.
-3. A directory the user explicitly names.
-
-If several bundles exist (e.g., co-located ones plus a root-level one),
-treat each as fully independent: don't mix concepts or links across bundle
-boundaries, and note which bundle(s) were consulted when answering.
-
-The bundle root is the directory containing the top-level `index.md` (or,
-absent that, the `.okf/` directory itself) — **never** the repository
-root, even when a bundle happens to sit at or near it.
+Bundle root = the directory containing the top-level `index.md`, or the
+`.okf/` directory itself if there's no index — **never** the repo root,
+even when a bundle sits at or near it.
 
 ## Cross-linking
 
-SPEC §5 permits two link forms. When writing, default to **relative**
-links (§5.2: `./orders.md`, `../tables/customers.md`) — they resolve
-correctly in GitHub's web UI, VS Code's explorer and markdown preview, and
-plain `cat`, regardless of where the bundle sits in the repo tree.
-
-Avoid *writing* SPEC §5.1's absolute `/`-prefixed form even though it's
-spec-legal: GitHub and VS Code both resolve a leading `/` against the
-repository/workspace root, not the bundle root, so it only happens to
-work when the bundle root and repo root are the same directory — which
-co-location (above) makes the exception, not the rule. Still tolerate it
-when *reading* — a link written before this guidance, or by another
-producer, is not malformed (SPEC §9).
+SPEC §5 permits relative links (`./orders.md`) and absolute
+bundle-relative links (`/tables/orders.md`). Default to **relative**
+when writing: GitHub, VS Code, and `cat` resolve a leading `/` against
+the repo root, not the bundle root, so the absolute form only works by
+coincidence when they're the same directory — which co-location (above)
+makes the exception, not the rule. Still tolerate absolute links when
+reading; a differently-formed link isn't malformed (SPEC §9).
 
 ## Read mode (default)
 
@@ -89,16 +76,11 @@ yourself; don't ask the user to choose between bootstrap and update:
    (ISO 8601). Favor structured markdown (tables, `# Schema`, `# Examples`).
 4. Cross-link with relative links (`../tables/orders.md`, `./orders.md`) —
    see Cross-linking above.
-5. Write a root `index.md` (frontmatter allowed **only** here). Include
-   `okf_version: "0.1"` plus, as a house convention layered on SPEC's
-   permissive extension rule (§4.1), standard manifest fields describing
-   the bundle itself: `type` (the boundary this bundle covers — e.g.
-   `service`, `library`, `app`, `team`), `title` (human-readable component
-   name), and `tags` (scope limiters). `resource` is welcome too when
-   there's a canonical URI for the bundle's subject (repo, package,
-   service). This lets an agent that finds several co-located bundles
-   tell them apart without opening each one. Also write per-directory
-   `index.md` files.
+5. Write a root `index.md` (frontmatter allowed **only** here):
+   `okf_version: "0.1"`, `type` (the boundary this bundle covers — e.g.
+   `service`, `library`, `app`, `team`), `title`, `tags` (scope
+   limiters), and `resource` when there's a canonical URI for the
+   bundle's subject. Also write per-directory `index.md` files.
 6. Write `log.md` with today's date and an `**Initialization**` entry.
 
 ### B. Update (bundle exists)
@@ -142,16 +124,11 @@ If the repo is not under git, skip the git comparisons and rely on
 
 ### Write checklist
 
-- [ ] Every non-reserved `.md` has parseable frontmatter with non-empty `type`.
-- [ ] Links are relative (not `/`-absolute) so they resolve correctly in
-      GitHub, VS Code, and other common dev tools without needing to know
-      the bundle root.
-- [ ] Affected `index.md` files reflect current contents.
-- [ ] `log.md` has a dated entry for this change.
-- [ ] Unknown pre-existing frontmatter keys preserved.
 - [ ] Broad updates: recency gate applied first; current subtrees left
       untouched.
-- [ ] Bundle validates cleanly (see Validation below).
+- [ ] Unknown pre-existing frontmatter keys preserved when round-tripping.
+- [ ] Bundle validates cleanly (see Validation below) — the validator
+      covers frontmatter, `type`, links, index files, and `log.md`.
 
 ## Validation
 
@@ -165,8 +142,7 @@ go run <skill-base-dir>/scripts <bundle-path>
 
 `<skill-base-dir>` is this skill's own directory (wherever it's installed —
 `~/.claude/skills/okf`, a project's `.claude/skills/okf`, or this source
-repo). The script is stdlib-only Go, so `go run` needs nothing beyond a Go
-toolchain: no build step, no dependencies to fetch. It prints a JSON report
+repo). Stdlib-only Go, so `go run` needs just a Go toolchain. It prints a JSON report
 (`conformant`, `counts`, `findings`) and exits non-zero when the bundle has
 SPEC violations (errors) or, with `-strict`, when it merely has
 house-convention warnings (unrelated to genuine SPEC conformance). Each

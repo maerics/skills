@@ -42,9 +42,6 @@ A single JSON document:
 }
 ```
 
-Printed as-is to stdout (no color, no pretty-printing beyond the fixed
-2-space JSON indent) — pipe through `jq` yourself if you want that.
-
 ## Exit codes
 
 | Code | Meaning |
