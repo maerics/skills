@@ -4,8 +4,10 @@ description: >-
   Read and write Open Knowledge Format (OKF) knowledge bundles — Google Cloud's
   vendor-neutral markdown + YAML spec for AI-agent knowledge bases. Use when
   reading project knowledge from a .okf/ (or explicitly named) directory,
-  answering a question a curated knowledge base would cover, or when asked to
-  bootstrap, update, or reconcile an OKF bundle.
+  answering a question a curated knowledge base would cover, when asked to
+  bootstrap, update, or reconcile an OKF bundle, or — proactively, without
+  being asked — after making any code/doc change in a project that already
+  has an OKF bundle, so the bundle stays in sync with what it describes.
 ---
 
 # OKF: Open Knowledge Format
