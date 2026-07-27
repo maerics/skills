@@ -1,0 +1,2 @@
+The OKF doc for b.go is out of date — it no longer matches what B() returns.
+Update it.
