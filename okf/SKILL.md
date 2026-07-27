@@ -83,7 +83,22 @@ yourself; don't ask the user to choose between bootstrap and update:
    `okf_version: "0.1"`, `type` (the boundary this bundle covers — e.g.
    `service`, `library`, `app`, `team`), `title`, `tags` (scope
    limiters), and `resource` when there's a canonical URI for the
-   bundle's subject. Also write per-directory `index.md` files.
+   bundle's subject. Also write per-directory `index.md` files — these
+   get **no** frontmatter at all; only the bundle root does. When an
+   index's concepts form a real graph (a pipeline's stage order, a state
+   machine, service dependencies), add a fenced `mermaid` block there
+   that draws it — do this, don't just describe it in prose:
+
+   ~~~
+   ```mermaid
+   flowchart LR
+     Ingest --> Transform --> Load
+   ```
+   ~~~
+
+   When the concepts are independent (no shared order or dependency
+   between them), skip the diagram entirely — forcing one onto unrelated
+   concepts is worse than not having one.
 6. Write `log.md` with today's date and an `**Initialization**` entry.
 
 ### B. Update (bundle exists)
