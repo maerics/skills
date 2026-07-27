@@ -118,9 +118,9 @@ bundle size:
 4. **Otherwise, descend and reconcile only that subtree**: update the
    concept docs whose subjects changed, preserve unknown frontmatter keys
    when round-tripping (§4.1), refresh that directory's `index.md`, bump
-   each touched concept's `timestamp`, and append a dated entry
+   each touched concept's `timestamp`, and prepend a dated entry
    (`**Update**`, `**Creation**`, `**Deprecation**`) to that directory's
-   `log.md`.
+   `log.md` — newest first (SPEC §7), above any existing entries.
 
 If the repo is not under git, skip the git comparisons and rely on
 `log.md` dates and `timestamp` fields alone throughout.
