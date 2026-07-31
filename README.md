@@ -4,8 +4,8 @@ Personal, provider-agnostic AI skills — plain folders any agent can read.
 
 Each skill is a directory containing a `SKILL.md` with YAML frontmatter
 (`name`, `description`) and whatever supporting files it needs. The format
-follows the common Agent Skills convention, so it works with Claude Code and
-any tool that reads the same layout.
+follows the common Agent Skills convention, so it works with Claude Code,
+Codex, and any tool that reads the same layout.
 
 ## Skills
 
@@ -39,11 +39,20 @@ Symlinking keeps the skill updating with `git pull`; copy instead if you want
 a frozen version. Claude picks the skill up automatically when a task matches
 its `description` — invoke it explicitly with `/okf`.
 
-### Other providers
+### Codex
 
-_Coming soon._ The layout follows the common Agent Skills convention (a
-directory with a `SKILL.md` carrying `name`/`description` frontmatter), so any
-tool that reads that convention can consume these skills the same way.
+Codex discovers personal skills in `$CODEX_HOME/skills` (normally
+`~/.codex/skills`). Install the skill by cloning this repo and symlinking (or
+copying) its directory:
+
+```sh
+mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills"
+ln -s ~/src/skills/okf "${CODEX_HOME:-$HOME/.codex}/skills/okf"
+```
+
+Symlinking keeps the skill updating with `git pull`; copy instead if you want
+a frozen version. Codex picks the skill up automatically when a task matches
+its `description` — invoke it explicitly with `$okf`.
 
 ## Using the okf skill
 

@@ -31,7 +31,9 @@ var (
 )
 
 func main() {
+	agent := flag.String("agent", "claude", "agent to invoke: claude or codex")
 	claudeBin := flag.String("claude", "claude", "claude CLI binary to invoke")
+	codexBin := flag.String("codex", "codex", "codex CLI binary to invoke")
 	only := flag.String("case", "", "comma-separated case names to run (default: all)")
 	permMode := flag.String("permission-mode", "acceptEdits", "--permission-mode passed to the agent under test")
 	noJudge := flag.Bool("no-judge", false, "skip LLM-judge grading, report validator conformance only")
@@ -47,13 +49,18 @@ func main() {
 	}
 	flag.Parse()
 
+	if *agent != "claude" && *agent != "codex" {
+		fmt.Fprintf(os.Stderr, "okf-evals: unknown agent %q (want claude or codex)\n", *agent)
+		os.Exit(1)
+	}
+
 	names, err := caseNames(*only)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "okf-evals:", err)
 		os.Exit(1)
 	}
 
-	opts := runOpts{claudeBin: *claudeBin, permMode: *permMode, judge: !*noJudge, keep: *keep}
+	opts := runOpts{agent: *agent, claudeBin: *claudeBin, codexBin: *codexBin, permMode: *permMode, judge: !*noJudge, keep: *keep}
 	results := make([]caseResult, 0, len(names))
 	allPass := true
 	for _, name := range names {

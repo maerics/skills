@@ -5,16 +5,17 @@ make the right judgment calls (mode selection, recency gate, cross-link
 convention, frontmatter preservation), not just produce SPEC-valid output.
 
 This is a different layer from `../scripts/*_test.go`, which are
-deterministic unit tests of the validator itself. These invoke a real
-`claude -p` agent per case and cost real API usage.
+deterministic unit tests of the validator itself. These invoke a real Claude
+or Codex agent per case and may cost real API usage.
 
 ## Running
 
 ```sh
-go run .                       # all cases
-go run . -case bootstrap-fresh # one case
-go run . -no-judge              # skip the LLM judge, report validator conformance only
-go run . -keep                  # keep each case's working dir for inspection
+go run .                                # all cases with Claude (default)
+go run . -agent=codex                    # all cases with Codex
+go run . -agent=codex -case bootstrap-fresh # one Codex case
+go run . -no-judge                       # skip the LLM judge, report validator conformance only
+go run . -keep                           # keep each case's working dir for inspection
 ```
 
 Prints a JSON report per case and exits nonzero if any case fails.
@@ -28,15 +29,17 @@ cases/<name>/
   rubric.md    # pass/fail checks a second agent grades against
 ```
 
-Each run: copies `fixture/` to a temp dir, symlinks the `okf` skill into
-`.claude/skills/okf` there (so it resolves like it would in a real repo),
-runs `claude -p "$(cat prompt.txt)"` against it, runs
+Each run: copies `fixture/` to a temp dir, symlinks the `okf` skill into the
+selected provider's project-scoped skill path (`.claude/skills/okf` or
+`.codex/skills/okf`), runs the case prompt against it, runs
 `../scripts/validate -strict .okf` on the result, and — unless `-no-judge`
-— asks a fresh agent to grade the rubric against the working dir and the
-tested agent's final message.
+— asks a fresh agent of the same provider to grade the rubric against the
+working dir and the tested agent's final message. Claude cost is included in
+the JSON report; Codex results omit `cost_usd` because its CLI does not expose
+the same value.
 
 `go test ./...` only checks case directories are well-formed (prompt/
-rubric/fixture present); it does not invoke `claude` and costs nothing.
+rubric/fixture present); it does not invoke either agent and costs nothing.
 
 ## Adding a case
 

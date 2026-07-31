@@ -34,3 +34,63 @@ func TestCaseStructure(t *testing.T) {
 		})
 	}
 }
+
+func TestInstallSkillUsesProviderPath(t *testing.T) {
+	for _, agent := range []string{"claude", "codex"} {
+		t.Run(agent, func(t *testing.T) {
+			work := t.TempDir()
+			if err := installSkill(work, agent); err != nil {
+				t.Fatal(err)
+			}
+			path := filepath.Join(work, "."+agent, "skills", "okf")
+			info, err := os.Lstat(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if info.Mode()&os.ModeSymlink == 0 {
+				t.Fatalf("%s is not a symlink", path)
+			}
+		})
+	}
+}
+
+func TestRunCodexCapturesLastMessage(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		judge   bool
+		sandbox string
+	}{
+		{name: "agent", sandbox: "workspace-write"},
+		{name: "judge", judge: true, sandbox: "read-only"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			bin := filepath.Join(t.TempDir(), "codex")
+			script := "#!/bin/sh\n" +
+				"[ \"$1\" = exec ] || exit 10\n" +
+				"last= sandbox=\n" +
+				"while [ $# -gt 0 ]; do\n" +
+				"  case \"$1\" in\n" +
+				"    --output-last-message) last=\"$2\"; shift 2;;\n" +
+				"    --sandbox) sandbox=\"$2\"; shift 2;;\n" +
+				"    *) shift;;\n" +
+				"  esac\n" +
+				"done\n" +
+				"[ \"$sandbox\" = \"" + tc.sandbox + "\" ] || exit 11\n" +
+				"printf 'final response' > \"$last\"\n"
+			if err := os.WriteFile(bin, []byte(script), 0o755); err != nil {
+				t.Fatal(err)
+			}
+
+			turn, err := runCodex(bin, t.TempDir(), "test prompt", tc.judge)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if turn.Result != "final response" {
+				t.Fatalf("result = %q", turn.Result)
+			}
+			if turn.CostUSD != nil {
+				t.Fatalf("CostUSD = %v, want nil", *turn.CostUSD)
+			}
+		})
+	}
+}

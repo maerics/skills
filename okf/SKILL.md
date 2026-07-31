@@ -159,7 +159,7 @@ validator script bundled in this skill:
 ```
 
 `<skill-base-dir>` is this skill's own directory (wherever it's installed —
-`~/.claude/skills/okf`, a project's `.claude/skills/okf`, or this source
+`~/.claude/skills/okf`, `${CODEX_HOME:-$HOME/.codex}/skills/okf`, or this source
 repo). `validate` is a thin shell wrapper around `go run .`, so it works
 from any working directory and needs nothing but a Go toolchain — no build
 step, no dependencies to fetch. It prints a JSON report
