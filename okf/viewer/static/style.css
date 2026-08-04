@@ -90,9 +90,9 @@ a { color: var(--link); }
 }
 
 .sidebar {
-  flex: 0 0 260px;
-  max-width: 260px;
-  border-right: 1px solid var(--border);
+  flex: 0 0 var(--sidebar-width, 260px);
+  width: var(--sidebar-width, 260px);
+  max-width: 80vw;
   background: var(--sidebar-bg);
   padding: 1rem;
   position: sticky;
@@ -100,6 +100,33 @@ a { color: var(--link); }
   height: 100vh;
   overflow-y: auto;
 }
+
+.sidebar-resizer {
+  flex: 0 0 7px;
+  width: 7px;
+  align-self: stretch;
+  cursor: col-resize;
+  position: relative;
+}
+
+.sidebar-resizer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--border);
+  transform: translateX(-50%);
+}
+
+.sidebar-resizer:hover::after,
+.sidebar-resizer.dragging::after {
+  width: 2px;
+  background: var(--link);
+}
+
+body.resizing { cursor: col-resize; user-select: none; }
 
 .sidebar-header {
   font-weight: 600;

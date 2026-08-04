@@ -42,4 +42,35 @@
     mermaid.initialize({ startOnLoad: false, theme: isDark() ? "dark" : "default" });
     mermaid.run();
   }
+
+  var MIN_SIDEBAR_WIDTH = 160;
+  var MAX_SIDEBAR_WIDTH = 600;
+
+  var resizer = document.getElementById("sidebar-resizer");
+  var sidebar = document.getElementById("sidebar");
+  if (resizer && sidebar) {
+    resizer.addEventListener("mousedown", function (e) {
+      e.preventDefault();
+      resizer.classList.add("dragging");
+      document.body.classList.add("resizing");
+
+      function onMove(e) {
+        var width = e.clientX - sidebar.getBoundingClientRect().left;
+        width = Math.max(MIN_SIDEBAR_WIDTH, Math.min(MAX_SIDEBAR_WIDTH, width));
+        document.documentElement.style.setProperty("--sidebar-width", width + "px");
+      }
+
+      function onUp() {
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+        resizer.classList.remove("dragging");
+        document.body.classList.remove("resizing");
+        var width = sidebar.getBoundingClientRect().width;
+        try { localStorage.setItem("okf-sidebar-width", Math.round(width)); } catch (e) {}
+      }
+
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    });
+  }
 })();

@@ -39,7 +39,7 @@ const pageHTML = `{{define "page"}}<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{.Title}} &middot; {{.BundleName}}</title>
-<script>(function(){try{var t=localStorage.getItem("okf-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem("okf-theme");if(t)document.documentElement.setAttribute("data-theme",t);var w=localStorage.getItem("okf-sidebar-width");if(w)document.documentElement.style.setProperty("--sidebar-width",w+"px");}catch(e){}})();</script>
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -48,10 +48,11 @@ const pageHTML = `{{define "page"}}<!doctype html>
   <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
 </button>
 <div class="layout">
-  <nav class="sidebar">
+  <nav class="sidebar" id="sidebar">
     <div class="sidebar-header"><a href="/">{{.BundleName}}</a></div>
     {{template "tree" (subtree .Tree .Current)}}
   </nav>
+  <div class="sidebar-resizer" id="sidebar-resizer"></div>
   <main>
     {{if .Breadcrumb}}
     <nav class="breadcrumb">
