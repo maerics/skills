@@ -175,3 +175,9 @@ finding cites the SPEC section it's based on.
   consult it rather than guessing.
 - [scripts/README.md](scripts/README.md) — the bundle validator invoked
   above: full check list, output shape, exit codes.
+- [viewer/README.md](viewer/README.md) — a local browser viewer for a
+  bundle: `<skill-base-dir>/viewer/view <bundle-path>`. Offer it when the
+  user wants to browse, look at, or see a bundle; never launch it
+  unprompted, since opening a browser window is a UI side effect. It opens
+  a browser itself and shuts its own server down when no tab has it open,
+  so there's no process to manage afterward.
