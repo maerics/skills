@@ -5,6 +5,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"net"
@@ -21,10 +22,11 @@ import (
 const (
 	defaultGracePeriod = 3 * time.Second
 	defaultIdleTimeout = 5 * time.Minute
+	defaultPort        = 3030
 )
 
 func main() {
-	port := flag.Int("port", 0, "port to listen on (0 = OS-assigned)")
+	port := flag.Int("port", defaultPort, "port to listen on")
 	noOpen := flag.Bool("no-open", false, "don't launch a browser automatically")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "usage: %s [-port N] [-no-open] [bundle-path]\n\n"+
@@ -32,7 +34,9 @@ func main() {
 			"it in a browser. bundle-path defaults to \".\"; if it contains a .okf\n"+
 			"subdirectory, that is used as the bundle root. The server shuts\n"+
 			"itself down once no browser tab has it open, so there's nothing to\n"+
-			"clean up manually.\n\n", os.Args[0])
+			"clean up manually. The port defaults to %d (fixed, not OS-assigned)\n"+
+			"so the browser's dark-mode preference, stored per-origin, survives\n"+
+			"across launches.\n\n", os.Args[0], defaultPort)
 		flag.PrintDefaults()
 	}
 	flag.Parse()
@@ -50,7 +54,11 @@ func main() {
 
 	ln, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", *port))
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "okf-viewer:", err)
+		if errors.Is(err, syscall.EADDRINUSE) {
+			fmt.Fprintf(os.Stderr, "okf-viewer: port %d is already in use (another viewer running? try -port to pick a different one)\n", *port)
+		} else {
+			fmt.Fprintln(os.Stderr, "okf-viewer:", err)
+		}
 		os.Exit(1)
 	}
 

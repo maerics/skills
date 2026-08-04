@@ -16,7 +16,7 @@ Arguments:
   bundle-path    Bundle root, or a directory containing .okf/. Defaults to ".".
 
 Flags:
-  -port N        Port to listen on. Defaults to 0 (OS-assigned).
+  -port N        Port to listen on. Defaults to 3030.
   -no-open       Don't launch a browser automatically.
 ```
 
@@ -31,8 +31,13 @@ needed for a loopback-only server.
 
 ## Lifecycle
 
-- The server picks an OS-assigned free port, prints its URL, and (unless
-  `-no-open`) opens it in the default browser.
+- The server binds a fixed port (3030 by default, `-port` to override),
+  prints its URL, and (unless `-no-open`) opens it in the default browser.
+  A stable port keeps the origin stable too, so the browser's dark-mode
+  preference (stored in `localStorage`, which is scoped per-origin
+  including port) persists across launches instead of resetting each time.
+  If the port's already taken — e.g. another viewer instance is running —
+  startup fails with a clear error; pass `-port` to pick a different one.
 - Each open tab holds one websocket connection at `/ws` for as long as the
   page is open. When the last one closes, a short grace period (a few
   seconds, to ride out normal page-to-page navigation) runs before the
