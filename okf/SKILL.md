@@ -155,7 +155,7 @@ one, confirm it against SPEC.md and the conventions above with the
 validator script bundled in this skill:
 
 ```sh
-<skill-base-dir>/scripts/validate [-strict] <bundle-path>
+<skill-base-dir>/scripts/validate/validate [-strict] <bundle-path>
 ```
 
 `<skill-base-dir>` is this skill's own directory (wherever it's installed —
@@ -173,11 +173,11 @@ finding cites the SPEC section it's based on.
 - [SPEC.md](SPEC.md) — the full OKF v0.1 specification (authoritative).
 - Terminology, conformance, citations, and versioning all live in SPEC.md;
   consult it rather than guessing.
-- [scripts/README.md](scripts/README.md) — the bundle validator invoked
-  above: full check list, output shape, exit codes.
-- [viewer/README.md](viewer/README.md) — a local browser viewer for a
-  bundle: `<skill-base-dir>/viewer/view <bundle-path>`. Offer it when the
-  user wants to browse, look at, or see a bundle; never launch it
+- [scripts/validate/README.md](scripts/validate/README.md) — the bundle
+  validator invoked above: full check list, output shape, exit codes.
+- [scripts/viewer/README.md](scripts/viewer/README.md) — a local browser
+  viewer for a bundle: `<skill-base-dir>/scripts/viewer/view <bundle-path>`.
+  Offer it when the user wants to browse, look at, or see a bundle; never launch it
   unprompted, since opening a browser window is a UI side effect. It opens
   a browser itself and shuts its own server down when no tab has it open,
   so there's no process to manage afterward.

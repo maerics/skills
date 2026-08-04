@@ -4,7 +4,7 @@ Behavioral evals for the `okf` skill: does an agent following `SKILL.md`
 make the right judgment calls (mode selection, recency gate, cross-link
 convention, frontmatter preservation), not just produce SPEC-valid output.
 
-This is a different layer from `../scripts/*_test.go`, which are
+This is a different layer from `../scripts/validate/*_test.go`, which are
 deterministic unit tests of the validator itself. These invoke a real Claude
 or Codex agent per case and may cost real API usage.
 
@@ -32,7 +32,7 @@ cases/<name>/
 Each run: copies `fixture/` to a temp dir, symlinks the `okf` skill into the
 selected provider's project-scoped skill path (`.claude/skills/okf` or
 `.codex/skills/okf`), runs the case prompt against it, runs
-`../scripts/validate -strict .okf` on the result, and — unless `-no-judge`
+`../scripts/validate/validate -strict .okf` on the result, and — unless `-no-judge`
 — asks a fresh agent of the same provider to grade the rubric against the
 working dir and the tested agent's final message. Claude cost is included in
 the JSON report; Codex results omit `cost_usd` because its CLI does not expose

@@ -1,6 +1,6 @@
 // Bundle walking, frontmatter extraction, and markdown rendering for the
 // viewer. Parsing here is deliberately lenient (best-effort display) rather
-// than the strict conformance checking scripts/ does — a malformed or
+// than the strict conformance checking scripts/validate/ does — a malformed or
 // unconventional bundle should still render as much as it can, never error
 // out or crash.
 package main
@@ -55,7 +55,7 @@ type DirNode struct {
 
 // resolveBundleRoot resolves path to a bundle root directory: if
 // <path>/.okf is a directory, that is the bundle root; otherwise path
-// itself is treated as the bundle root. Mirrors scripts/bundle.go.
+// itself is treated as the bundle root. Mirrors scripts/validate/bundle.go.
 func resolveBundleRoot(path string) (string, error) {
 	info, err := os.Stat(path)
 	if err != nil {

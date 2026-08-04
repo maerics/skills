@@ -1,7 +1,7 @@
 # okf-validate
 
 Validates an OKF (Open Knowledge Format) knowledge bundle against
-[SPEC.md](../SPEC.md) and the [okf skill](../SKILL.md)'s house directives,
+[SPEC.md](../../SPEC.md) and the [okf skill](../../SKILL.md)'s house directives,
 printing a JSON report of any findings. Stdlib-only Go — no dependencies,
 no build step.
 
@@ -18,9 +18,9 @@ Flags:
 ```
 
 `validate` is a shell wrapper around `go run .` that resolves its own
-location, so it works from anywhere: `<skill-base-dir>/scripts/validate
+location, so it works from anywhere: `<skill-base-dir>/scripts/validate/validate
 <bundle-path>`. Equivalent without the wrapper: `go run .` from this
-directory, or `go run <skill-base-dir>/scripts <bundle-path>` from anywhere.
+directory, or `go run <skill-base-dir>/scripts/validate <bundle-path>` from anywhere.
 
 ## Output
 

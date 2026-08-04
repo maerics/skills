@@ -21,9 +21,9 @@ Flags:
 ```
 
 `view` is a shell wrapper around `go run .` that resolves its own location,
-so it works from anywhere: `<skill-base-dir>/viewer/view <bundle-path>`.
+so it works from anywhere: `<skill-base-dir>/scripts/viewer/view <bundle-path>`.
 Equivalent without the wrapper: `go run .` from this directory, or
-`go run <skill-base-dir>/viewer <bundle-path>` from anywhere.
+`go run <skill-base-dir>/scripts/viewer <bundle-path>` from anywhere.
 
 The server binds to `127.0.0.1` only — never `0.0.0.0` — so it's never
 reachable off the local machine; there's no authentication because none is
@@ -55,8 +55,8 @@ diagrams via a vendored, embedded copy of
 `go:embed` so the viewer works fully offline).
 
 Frontmatter parsing here is deliberately lenient — best-effort display,
-never rejects a bundle — unlike `../scripts/`'s strict conformance checks.
-Run `../scripts/validate` separately if you want conformance checking.
+never rejects a bundle — unlike `../validate/`'s strict conformance checks.
+Run `../validate/validate` separately if you want conformance checking.
 
 Links are rewritten after parsing:
 

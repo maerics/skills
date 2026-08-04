@@ -27,7 +27,7 @@ var evalsDir = func() string {
 var (
 	skillDir    = filepath.Dir(evalsDir)           // okf/
 	casesDir    = filepath.Join(evalsDir, "cases") // okf/evals/cases/
-	validateBin = filepath.Join(skillDir, "scripts", "validate")
+	validateBin = filepath.Join(skillDir, "scripts", "validate", "validate")
 )
 
 func main() {
