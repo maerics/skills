@@ -143,16 +143,20 @@ type breadcrumbItem struct {
 	Href string
 }
 
-// buildBreadcrumb turns "tables/orders.md" into Index > tables > (current
-// page, not linked). An ancestor only gets a link if its index.md actually
-// exists, so the breadcrumb never points at a dead route.
+// buildBreadcrumb turns "tables/orders.md" into index > tables > orders,
+// with the last segment (the page currently being displayed) unlinked. An
+// ancestor only gets a link if its index.md actually exists, so the
+// breadcrumb never points at a dead route.
 func buildBreadcrumb(root, relPath string) []breadcrumbItem {
 	items := []breadcrumbItem{{Name: "index", Href: "/"}}
+	if relPath == indexFile {
+		return items // the root index.md IS that first crumb
+	}
 	parts := strings.Split(relPath, "/")
 	cum := ""
 	for i, part := range parts {
 		if i == len(parts)-1 {
-			break // last segment is the page itself
+			break // last segment is the current page, handled below
 		}
 		if cum == "" {
 			cum = part
@@ -165,5 +169,20 @@ func buildBreadcrumb(root, relPath string) []breadcrumbItem {
 		}
 		items = append(items, item)
 	}
+	items = append(items, breadcrumbItem{Name: crumbLabel(parts[len(parts)-1])})
 	return items
+}
+
+// crumbLabel names the final (current-page) breadcrumb segment, matching
+// the sidebar's own labels: "index" and "log" are fixed regardless of
+// directory, everything else is its filename without the .md suffix.
+func crumbLabel(filename string) string {
+	switch filename {
+	case indexFile:
+		return "index"
+	case logFile:
+		return "log"
+	default:
+		return strings.TrimSuffix(filename, ".md")
+	}
 }

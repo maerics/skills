@@ -56,7 +56,7 @@ const pageHTML = `{{define "page"}}<!doctype html>
   <main>
     {{if .Breadcrumb}}
     <nav class="breadcrumb">
-      {{range .Breadcrumb}}{{if .Href}}<a href="{{.Href}}">{{.Name}}</a>{{else}}<span>{{.Name}}</span>{{end}} / {{end}}
+      {{range $i, $item := .Breadcrumb}}{{if $i}} / {{end}}{{if $item.Href}}<a href="{{$item.Href}}">{{$item.Name}}</a>{{else}}<span>{{$item.Name}}</span>{{end}}{{end}}
     </nav>
     {{end}}
     {{if .Meta}}
