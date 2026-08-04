@@ -23,9 +23,23 @@
   window.addEventListener("beforeunload", function () { unloading = true; });
   connect();
 
+  function isDark() {
+    var explicit = document.documentElement.getAttribute("data-theme");
+    if (explicit) return explicit === "dark";
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+
+  var toggle = document.getElementById("theme-toggle");
+  if (toggle) {
+    toggle.addEventListener("click", function () {
+      var next = isDark() ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      try { localStorage.setItem("okf-theme", next); } catch (e) {}
+    });
+  }
+
   if (window.mermaid) {
-    var dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-    mermaid.initialize({ startOnLoad: false, theme: dark ? "dark" : "default" });
+    mermaid.initialize({ startOnLoad: false, theme: isDark() ? "dark" : "default" });
     mermaid.run();
   }
 })();
