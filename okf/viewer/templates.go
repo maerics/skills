@@ -84,7 +84,7 @@ const pageHTML = `{{define "page"}}<!doctype html>
 {{end}}`
 
 const treeHTML = `{{define "tree"}}<ul class="tree">
-  {{with .Node.Index}}<li class="entry entry-index{{if eq .RelPath $.Current}} active{{end}}"><a href="/view/{{.RelPath}}">{{if $.Node.RelPath}}{{$.Node.Name}}{{else}}Index{{end}}</a></li>{{end}}
+  {{with .Node.Index}}<li class="entry entry-index{{if eq .RelPath $.Current}} active{{end}}"><a href="/view/{{.RelPath}}">&#128214; index</a></li>{{end}}
   {{range .Node.Concepts}}<li class="entry entry-concept{{if eq .RelPath $.Current}} active{{end}}"><a href="/view/{{.RelPath}}" title="{{.Title}}">{{stem .Name}}</a></li>{{end}}
   {{range .Node.Dirs}}<li class="entry entry-dir"><details open><summary>{{.Name}}/</summary>{{template "tree" (subtree . $.Current)}}</details></li>{{end}}
   {{with .Node.Log}}<li class="entry entry-log{{if eq .RelPath $.Current}} active{{end}}"><a href="/view/{{.RelPath}}">[log]</a></li>{{end}}
