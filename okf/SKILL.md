@@ -5,6 +5,7 @@ description: >-
   vendor-neutral markdown + YAML spec for AI-agent knowledge bases. Use when
   reading project knowledge from a .okf/ (or explicitly named) directory,
   answering a question a curated knowledge base would cover, when asked to
+  show/display/browse/view a bundle (launches the local viewer), when asked to
   bootstrap, update, or reconcile an OKF bundle, or — proactively, without
   being asked — after making any code/doc change in a project that already
   has an OKF bundle, so the bundle stays in sync with what it describes.
@@ -51,6 +52,18 @@ reading; a differently-formed link isn't malformed (SPEC §9).
 
 Triggered when the user asks something a curated knowledge base would answer,
 or references project knowledge. Do **not** slurp the whole tree.
+
+**Exception — "show"/"display"/"browse"/"view" the bundle**: launch the
+local viewer instead of reading and summarizing files yourself (see
+[scripts/viewer/README.md](scripts/viewer/README.md)):
+
+```sh
+<skill-base-dir>/scripts/viewer/view <bundle-path>
+```
+
+This is a direct request for the UI, not a question to answer from
+content — don't substitute a text summary for it. For every other
+read-mode ask, proceed as below and just mention the viewer as an option.
 
 1. Read the bundle-root `index.md` for progressive disclosure. If absent,
    synthesize a listing by scanning immediate children's frontmatter.
@@ -177,7 +190,8 @@ finding cites the SPEC section it's based on.
   validator invoked above: full check list, output shape, exit codes.
 - [scripts/viewer/README.md](scripts/viewer/README.md) — a local browser
   viewer for a bundle: `<skill-base-dir>/scripts/viewer/view <bundle-path>`.
-  Offer it when the user wants to browse, look at, or see a bundle; never launch it
-  unprompted, since opening a browser window is a UI side effect. It opens
-  a browser itself and shuts its own server down when no tab has it open,
-  so there's no process to manage afterward.
+  Launch it directly on "show"/"display"/"browse"/"view" requests (see Read
+  mode above); for other read requests, just mention it as an option rather
+  than launching it unprompted, since opening a browser window is a UI side
+  effect. It opens a browser itself and shuts its own server down when no
+  tab has it open, so there's no process to manage afterward.
