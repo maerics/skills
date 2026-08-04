@@ -1,7 +1,10 @@
 // HTML templates for the viewer's page shell and recursive sidebar tree.
 package main
 
-import "html/template"
+import (
+	"html/template"
+	"strings"
+)
 
 type pageData struct {
 	Title      string
@@ -23,6 +26,7 @@ type treeCtx struct {
 func mustParsePageTemplate() *template.Template {
 	funcs := template.FuncMap{
 		"subtree": func(n *DirNode, current string) treeCtx { return treeCtx{Node: n, Current: current} },
+		"stem":    func(filename string) string { return strings.TrimSuffix(filename, ".md") },
 	}
 	t := template.Must(template.New("page").Funcs(funcs).Parse(pageHTML))
 	t = template.Must(t.Parse(treeHTML))
@@ -75,7 +79,7 @@ const pageHTML = `{{define "page"}}<!doctype html>
 
 const treeHTML = `{{define "tree"}}<ul class="tree">
   {{with .Node.Index}}<li class="entry entry-index{{if eq .RelPath $.Current}} active{{end}}"><a href="/view/{{.RelPath}}">{{if $.Node.RelPath}}{{$.Node.Name}}{{else}}Index{{end}}</a></li>{{end}}
-  {{with .Node.Log}}<li class="entry entry-log{{if eq .RelPath $.Current}} active{{end}}"><a href="/view/{{.RelPath}}">Log</a></li>{{end}}
-  {{range .Node.Concepts}}<li class="entry entry-concept{{if eq .RelPath $.Current}} active{{end}}"><a href="/view/{{.RelPath}}">{{.Title}}</a></li>{{end}}
+  {{range .Node.Concepts}}<li class="entry entry-concept{{if eq .RelPath $.Current}} active{{end}}"><a href="/view/{{.RelPath}}" title="{{.Title}}">{{stem .Name}}</a></li>{{end}}
   {{range .Node.Dirs}}<li class="entry entry-dir"><details open><summary>{{.Name}}/</summary>{{template "tree" (subtree . $.Current)}}</details></li>{{end}}
+  {{with .Node.Log}}<li class="entry entry-log{{if eq .RelPath $.Current}} active{{end}}"><a href="/view/{{.RelPath}}">[log]</a></li>{{end}}
 </ul>{{end}}`

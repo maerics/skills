@@ -78,8 +78,7 @@ ul.tree > li.entry-dir:first-child,
 .entry a { text-decoration: none; display: inline-block; padding: 0.1rem 0.3rem; border-radius: 4px; }
 .entry a:hover { text-decoration: underline; }
 .entry.active a { background: var(--active-bg); font-weight: 600; }
-.entry-index a::before { content: "\1F4D1 "; }
-.entry-log a::before { content: "\1F4DC "; }
+.entry-log a { opacity: 0.6; }
 
 details > summary { cursor: pointer; font-weight: 500; padding: 0.1rem 0; }
 details > summary::-webkit-details-marker { color: var(--muted); }
