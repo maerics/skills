@@ -12,6 +12,8 @@ Codex, and any tool that reads the same layout.
 | Skill | Purpose |
 |-------|---------|
 | [`okf/`](okf/SKILL.md) | Read and write [Open Knowledge Format](okf/SPEC.md) knowledge bundles. |
+| [`elevator-pitch/`](elevator-pitch/SKILL.md) | Write for busy readers: takeaway first, then assessment, then detail. |
+| [`pr-review/`](pr-review/SKILL.md) | Review pull requests and write the review elevator-pitch style. |
 
 ## Installing
 
