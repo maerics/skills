@@ -117,14 +117,14 @@ func runCase(name string, opts runOpts) caseResult {
 	return res
 }
 
-// installSkill makes the okf skill available to the agent under test as a
+// installSkill makes the open-knowledge-format skill available to the agent under test as a
 // project-scoped skill, the same way it'd be found in a real repo.
 func installSkill(work, agent string) error {
 	skills := filepath.Join(work, "."+agent, "skills")
 	if err := os.MkdirAll(skills, 0o755); err != nil {
 		return err
 	}
-	return os.Symlink(skillDir, filepath.Join(skills, "okf"))
+	return os.Symlink(skillDir, filepath.Join(skills, "open-knowledge-format"))
 }
 
 // runSetup runs caseDir/setup.sh, if present, with work as its cwd. Cases

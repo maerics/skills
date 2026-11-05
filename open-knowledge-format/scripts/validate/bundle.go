@@ -1,5 +1,5 @@
 // Command okf-validate checks an OKF (Open Knowledge Format) knowledge
-// bundle for conformance with SPEC.md and the okf skill's house directives.
+// bundle for conformance with SPEC.md and the open-knowledge-format skill's house directives.
 package main
 
 import (

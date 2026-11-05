@@ -1,4 +1,4 @@
-// Command okf-evals runs behavioral scenarios against the okf skill: each
+// Command okf-evals runs behavioral scenarios against the open-knowledge-format skill: each
 // case gives an agent a fixture repo and a task prompt, then grades the
 // result against the OKF validator (SPEC conformance) and a rubric (agent
 // judgment calls the validator can't check, graded by a second agent).
@@ -25,8 +25,8 @@ var evalsDir = func() string {
 }()
 
 var (
-	skillDir    = filepath.Dir(evalsDir)           // okf/
-	casesDir    = filepath.Join(evalsDir, "cases") // okf/evals/cases/
+	skillDir    = filepath.Dir(evalsDir)           // open-knowledge-format/
+	casesDir    = filepath.Join(evalsDir, "cases") // open-knowledge-format/evals/cases/
 	validateBin = filepath.Join(skillDir, "scripts", "validate", "validate")
 )
 
@@ -40,7 +40,7 @@ func main() {
 	keep := flag.Bool("keep", false, "keep each case's working directory instead of deleting it")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "usage: %s [flags]\n\n"+
-			"Run behavioral evals for the okf skill. Each case under cases/ gets a\n"+
+			"Run behavioral evals for the open-knowledge-format skill. Each case under cases/ gets a\n"+
 			"fresh copy of its fixture, an agent run against its prompt.txt, an OKF\n"+
 			"validator check, and (unless -no-judge) a second agent grading the\n"+
 			"result against its rubric.md. Prints a JSON report and exits nonzero\n"+

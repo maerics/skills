@@ -1,7 +1,7 @@
 # okf-validate
 
 Validates an OKF (Open Knowledge Format) knowledge bundle against
-[SPEC.md](../../SPEC.md) and the [okf skill](../../SKILL.md)'s house directives,
+[SPEC.md](../../SPEC.md) and the [open-knowledge-format skill](../../SKILL.md)'s house directives,
 printing a JSON report of any findings. Stdlib-only Go — no dependencies,
 no build step.
 

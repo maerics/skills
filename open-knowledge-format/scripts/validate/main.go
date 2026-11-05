@@ -11,7 +11,7 @@ func main() {
 	strict := flag.Bool("strict", false, "also fail (nonzero exit) when warnings are present")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "usage: %s [-strict] [bundle-path]\n\n"+
-			"Validate an OKF knowledge bundle against SPEC.md and the okf skill's\n"+
+			"Validate an OKF knowledge bundle against SPEC.md and the open-knowledge-format skill's\n"+
 			"house directives. bundle-path defaults to \".\"; if it contains a .okf\n"+
 			"subdirectory, that is used as the bundle root.\n\n", os.Args[0])
 		flag.PrintDefaults()

@@ -11,7 +11,7 @@ Codex, and any tool that reads the same layout.
 
 | Skill | Purpose |
 |-------|---------|
-| [`okf/`](okf/SKILL.md) | Read and write [Open Knowledge Format](okf/SPEC.md) knowledge bundles. |
+| [`open-knowledge-format/`](open-knowledge-format/SKILL.md) | Read and write [Open Knowledge Format](open-knowledge-format/SPEC.md) knowledge bundles. |
 | [`elevator-pitch/`](elevator-pitch/SKILL.md) | Write for busy readers: takeaway first, then assessment, then detail. |
 | [`pr-review/`](pr-review/SKILL.md) | Review pull requests and write the review elevator-pitch style. |
 
@@ -30,16 +30,16 @@ skill by cloning this repo and symlinking (or copying) the skill directory:
 ```sh
 # Personal — available in every project:
 mkdir -p ~/.claude/skills
-ln -s ~/src/skills/okf ~/.claude/skills/okf
+ln -s ~/src/skills/open-knowledge-format ~/.claude/skills/open-knowledge-format
 
 # ... or per-project — available in one repo only:
 mkdir -p .claude/skills
-ln -s ~/src/skills/okf .claude/skills/okf
+ln -s ~/src/skills/open-knowledge-format .claude/skills/open-knowledge-format
 ```
 
 Symlinking keeps the skill updating with `git pull`; copy instead if you want
 a frozen version. Claude picks the skill up automatically when a task matches
-its `description` — invoke it explicitly with `/okf`.
+its `description` — invoke it explicitly with `/open-knowledge-format`.
 
 ### Codex
 
@@ -49,24 +49,24 @@ copying) its directory:
 
 ```sh
 mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills"
-ln -s ~/src/skills/okf "${CODEX_HOME:-$HOME/.codex}/skills/okf"
+ln -s ~/src/skills/open-knowledge-format "${CODEX_HOME:-$HOME/.codex}/skills/open-knowledge-format"
 ```
 
 Symlinking keeps the skill updating with `git pull`; copy instead if you want
 a frozen version. Codex picks the skill up automatically when a task matches
-its `description` — invoke it explicitly with `$okf`.
+its `description` — invoke it explicitly with `$open-knowledge-format`.
 
-## Using the okf skill
+## Using the open-knowledge-format skill
 
 By default it **reads** knowledge from a `.okf/` directory (any other name
 must be given explicitly); on explicit request it **writes** — bootstrapping
 a new bundle or reconciling an existing one against reality. Independent
 modules (apps, services, libraries) are encouraged to keep their own
 co-located bundle rather than relying on a single one at the repo root. See
-[okf/SKILL.md](okf/SKILL.md).
+[open-knowledge-format/SKILL.md](open-knowledge-format/SKILL.md).
 
 ## Licensing
 
 Repository content is MIT (see [LICENSE](LICENSE)). The vendored OKF
-specification at [okf/SPEC.md](okf/SPEC.md) is © Google LLC under Apache-2.0
-(see [okf/LICENSE](okf/LICENSE) and [okf/NOTICE](okf/NOTICE)).
+specification at [open-knowledge-format/SPEC.md](open-knowledge-format/SPEC.md) is © Google LLC under Apache-2.0
+(see [open-knowledge-format/LICENSE](open-knowledge-format/LICENSE) and [open-knowledge-format/NOTICE](open-knowledge-format/NOTICE)).

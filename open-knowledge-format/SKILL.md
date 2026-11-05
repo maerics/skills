@@ -1,5 +1,5 @@
 ---
-name: okf
+name: open-knowledge-format
 description: >-
   Read and write Open Knowledge Format (OKF) knowledge bundles — Google Cloud's
   vendor-neutral markdown + YAML spec for AI-agent knowledge bases. Use when
@@ -172,7 +172,7 @@ validator script bundled in this skill:
 ```
 
 `<skill-base-dir>` is this skill's own directory (wherever it's installed —
-`~/.claude/skills/okf`, `${CODEX_HOME:-$HOME/.codex}/skills/okf`, or this source
+`~/.claude/skills/open-knowledge-format`, `${CODEX_HOME:-$HOME/.codex}/skills/open-knowledge-format`, or this source
 repo). `validate` is a thin shell wrapper around `go run .`, so it works
 from any working directory and needs nothing but a Go toolchain — no build
 step, no dependencies to fetch. It prints a JSON report

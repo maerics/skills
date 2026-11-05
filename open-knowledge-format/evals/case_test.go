@@ -42,7 +42,7 @@ func TestInstallSkillUsesProviderPath(t *testing.T) {
 			if err := installSkill(work, agent); err != nil {
 				t.Fatal(err)
 			}
-			path := filepath.Join(work, "."+agent, "skills", "okf")
+			path := filepath.Join(work, "."+agent, "skills", "open-knowledge-format")
 			info, err := os.Lstat(path)
 			if err != nil {
 				t.Fatal(err)

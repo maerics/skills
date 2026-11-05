@@ -1,6 +1,6 @@
 # okf-evals
 
-Behavioral evals for the `okf` skill: does an agent following `SKILL.md`
+Behavioral evals for the `open-knowledge-format` skill: does an agent following `SKILL.md`
 make the right judgment calls (mode selection, recency gate, cross-link
 convention, frontmatter preservation), not just produce SPEC-valid output.
 
@@ -29,9 +29,9 @@ cases/<name>/
   rubric.md    # pass/fail checks a second agent grades against
 ```
 
-Each run: copies `fixture/` to a temp dir, symlinks the `okf` skill into the
-selected provider's project-scoped skill path (`.claude/skills/okf` or
-`.codex/skills/okf`), runs the case prompt against it, runs
+Each run: copies `fixture/` to a temp dir, symlinks the `open-knowledge-format` skill into the
+selected provider's project-scoped skill path (`.claude/skills/open-knowledge-format` or
+`.codex/skills/open-knowledge-format`), runs the case prompt against it, runs
 `../scripts/validate/validate -strict .okf` on the result, and — unless `-no-judge`
 — asks a fresh agent of the same provider to grade the rubric against the
 working dir and the tested agent's final message. Claude cost is included in

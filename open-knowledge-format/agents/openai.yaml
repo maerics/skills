@@ -1,4 +1,4 @@
 interface:
   display_name: "OKF Knowledge Bundles"
   short_description: "Read and maintain OKF knowledge bundles"
-  default_prompt: "Use $okf to read or update this project's OKF knowledge bundle."
+  default_prompt: "Use $open-knowledge-format to read or update this project's OKF knowledge bundle."

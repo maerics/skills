@@ -80,7 +80,7 @@ Links are rewritten after parsing:
   files outside the bundle via `../` segments.
 - Bundle content is rendered with `goldmark`'s unsafe-HTML passthrough
   enabled, on the assumption that a bundle's own markdown is trusted
-  content (the same assumption the `okf` skill already makes when writing
+  content (the same assumption the `open-knowledge-format` skill already makes when writing
   it) — this is a local, single-user tool, not a public-facing server.
 
 ## Development
