@@ -13,15 +13,17 @@ description: >-
 
 # OKF: Open Knowledge Format
 
-The full, authoritative rules are in [SPEC.md](SPEC.md); read it before
-writing a bundle. This skill has exactly two operating modes: **read**
+The full, authoritative OKF v0.2 rules are in [SPEC.md](SPEC.md); read it
+before writing a bundle. The canonical source is
+https://github.com/GoogleCloudPlatform/open-knowledge-format/blob/main/SPEC.md.
+This skill has exactly two operating modes: **read**
 (default) and **write** (everything else).
 
 A bundle is a tree of concept documents. Reserved filenames: `index.md`
 (directory listing) and `log.md` (update history). Every other `.md` file
 is a concept with a required `type` frontmatter field. Consume
 **permissively**: tolerate unknown types, extra keys, broken links, and
-missing index files (SPEC §9).
+missing index files (SPEC §11).
 
 ## Locating a bundle
 
@@ -40,7 +42,7 @@ even when a bundle sits at or near it.
 
 ## Cross-linking
 
-SPEC §5 permits relative links (`./orders.md`) and absolute
+SPEC §6 permits relative links (`./orders.md`) and absolute
 bundle-relative links (`/tables/orders.md`). Default to **relative**
 when writing: GitHub, VS Code, and `cat` resolve a leading `/` against
 the repo root, not the bundle root, so the absolute form only works by
@@ -69,8 +71,9 @@ read-mode ask, proceed as below and just mention the viewer as an option.
    synthesize a listing by scanning immediate children's frontmatter.
 2. Follow the hierarchy and markdown links toward the relevant concept(s);
    open only what the question needs.
-3. Answer from concept bodies. Honor `resource` URIs and `# Citations` as
-   sources; surface them when they back a claim.
+3. Answer from concept bodies. Honor `sources` frontmatter and keyed
+   footnote attribution; for legacy v0.1 documents, also read `# Citations`.
+   Surface sources when they back a claim.
 4. Treat a broken link as not-yet-written knowledge, not an error.
 
 ## Write mode (everything else)
@@ -87,17 +90,18 @@ yourself; don't ask the user to choose between bootstrap and update:
    Pick descriptive `type` values (`SPEC.md` §4.1) and organize into
    subdirectories that fit the domain.
 3. Each concept: required `type`; recommended `title`, `description`,
-   `resource` (when it maps to a real asset), `tags`, and `timestamp`
-   (RFC 3339, e.g. `2006-01-02T15:04:05-07:00`). Favor structured markdown
-   (tables, `# Schema`, `# Examples`).
+   `resource` (when it maps to a real asset), and `tags`. Record authorship
+   and edit time with `generated: { by: <actor>, at: <RFC 3339 datetime> }`;
+   use actor forms from SPEC §7. Add `sources` with stable `id` values and
+   keyed footnotes when claims derive from references. Use `verified`,
+   `status`, and `stale_after` when useful; these are optional signals.
+   Favor structured markdown (tables, `# Schema`, `# Examples`).
 4. Cross-link with relative links (`../tables/orders.md`, `./orders.md`) —
    see Cross-linking above.
-5. Write a root `index.md` (frontmatter allowed **only** here):
-   `okf_version: "0.1"`, `type` (the boundary this bundle covers — e.g.
-   `service`, `library`, `app`, `team`), `title`, `tags` (scope
-   limiters), and `resource` when there's a canonical URI for the
-   bundle's subject. Also write per-directory `index.md` files — these
-   get **no** frontmatter at all; only the bundle root does. When an
+5. Write a root `index.md`; its optional frontmatter may contain only
+   `okf_version: "0.2"`. Write per-directory `index.md` files with no
+   frontmatter. Each index groups links under descriptive headings and
+   includes concept descriptions. When an
    index's concepts form a real graph (a pipeline's stage order, a state
    machine, service dependencies), add a fenced `mermaid` block there
    that draws it — do this, don't just describe it in prose:
@@ -120,8 +124,9 @@ First classify the ask:
 
 - **Targeted** (user names a specific concept, resource, or change): skip
   the gate below entirely. Locate or create that one concept, check only
-  its own `timestamp` (or its directory's `log.md`) against the resource it
-  describes, and write it. Nothing else needs to be opened.
+  its own `generated.at` (or legacy `timestamp`; otherwise its directory's
+  `log.md`) against the resource it describes, and write it. Nothing else
+  needs to be opened.
 - **Broad** ("reconcile", "is this up to date", "sync the bundle", or
   similar with no named target): apply the recency gate.
 
@@ -130,7 +135,7 @@ directory at a time, so cost scales with what's actually stale, not with
 bundle size:
 
 1. At each directory, read its nearest `log.md` heading date (log.md MAY
-   exist at any level — §7). No `log.md` at that level counts as unknown:
+   exist at any level — §9). No `log.md` at that level counts as unknown:
    treat it as stale and descend.
 2. Compare that date against the last material change to what the
    directory's concepts describe:
@@ -138,34 +143,38 @@ bundle size:
      --date=short -- <source-path>`.
    - If a concept has no git-trackable source (an external resource, a
      process, a third-party system), there is no cheap way to verify —
-     trust its own `timestamp`/`log.md` history rather than forcing a
-     rewrite you can't actually check.
+     trust its own `generated.at`/`timestamp`/`log.md` history rather than
+     forcing a rewrite you can't actually check.
 3. **If the directory's log date is ≥ every checked source's last change,
    it is current: prune.** Do not open its concept files, do not descend
    into its subdirectories, and don't mention it in the report.
 4. **Otherwise, descend and reconcile only that subtree**: update the
    concept docs whose subjects changed, preserve unknown frontmatter keys
    when round-tripping (§4.1), refresh that directory's `index.md`, bump
-   each touched concept's `timestamp`, and prepend a dated entry
+   each touched concept's `generated.at`, and prepend a dated entry
    (`**Update**`, `**Creation**`, `**Deprecation**`) to that directory's
-   `log.md` — newest first (SPEC §7), above any existing entries.
+   `log.md` — newest first (SPEC §9), above any existing entries. Compare
+   source changes with `generated.at`, falling back to legacy `timestamp`
+   for v0.1 concepts. On edits, refresh `generated.at` and preserve the
+   original `generated.by` when the same producer makes the change.
 
 If the repo is not under git, skip the git comparisons and rely on
-`log.md` dates and `timestamp` fields alone throughout.
+`log.md` dates and `generated.at` fields (or legacy `timestamp`) alone.
 
 ### Write checklist
 
 - [ ] Broad updates: recency gate applied first; current subtrees left
       untouched.
 - [ ] Unknown pre-existing frontmatter keys preserved when round-tripping.
-- [ ] Bundle validates cleanly (see Validation below) — the validator
-      covers frontmatter, `type`, links, index files, and `log.md`.
+- [ ] v0.2 fields are used correctly: `generated.at` for edit time,
+      `sources` for provenance, and `verified` as verification events.
+- [ ] Run the bundled structural validator (see Validation below); it
+      does not check every v0.2 field or attested computation contract.
 
 ## Validation
 
 After bootstrapping or updating a bundle, or whenever asked to check/lint
-one, confirm it against SPEC.md and the conventions above with the
-validator script bundled in this skill:
+one, run the bundled structural validator:
 
 ```sh
 <skill-base-dir>/scripts/validate/validate [-strict] <bundle-path>
@@ -177,17 +186,19 @@ repo). `validate` is a thin shell wrapper around `go run .`, so it works
 from any working directory and needs nothing but a Go toolchain — no build
 step, no dependencies to fetch. It prints a JSON report
 (`conformant`, `counts`, `findings`) and exits non-zero when the bundle has
-SPEC violations (errors) or, with `-strict`, when it merely has
-house-convention warnings (unrelated to genuine SPEC conformance). Each
-finding cites the SPEC section it's based on.
+structural errors detected by its current checks or, with `-strict`, when
+it finds house-convention warnings. It is not a complete v0.2 validator:
+in particular, it does not validate provenance, trust, lifecycle, or
+attested computation fields. Treat its report as a partial check, not proof
+of full SPEC conformance.
 
 ## Reference
 
-- [SPEC.md](SPEC.md) — the full OKF v0.1 specification (authoritative).
+- [SPEC.md](SPEC.md) — the full OKF v0.2 specification.
 - Terminology, conformance, citations, and versioning all live in SPEC.md;
   consult it rather than guessing.
-- [scripts/validate/README.md](scripts/validate/README.md) — the bundle
-  validator invoked above: full check list, output shape, exit codes.
+- [scripts/validate/README.md](scripts/validate/README.md) — the bundled
+  structural validator: check list, output shape, and exit codes.
 - [scripts/viewer/README.md](scripts/viewer/README.md) — a local browser
   viewer for a bundle: `<skill-base-dir>/scripts/viewer/view <bundle-path>`.
   Launch it directly on "show"/"display"/"browse"/"view" requests (see Read
