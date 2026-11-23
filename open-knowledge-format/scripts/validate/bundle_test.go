@@ -173,6 +173,7 @@ func TestWalkMarkdownFiles(t *testing.T) {
 	mustWrite(t, filepath.Join(tmp, "index.md"), "")
 	mustWrite(t, filepath.Join(tmp, "a.md"), "")
 	mustWrite(t, filepath.Join(tmp, "notes.txt"), "")
+	mustWrite(t, filepath.Join(tmp, ".hidden.md"), "")
 	if err := os.MkdirAll(filepath.Join(tmp, "sub"), 0o755); err != nil {
 		t.Fatal(err)
 	}

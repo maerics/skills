@@ -49,6 +49,9 @@ func validateBundle(root string) (Result, error) {
 			findings = append(findings, checkLogFile(rel, body, present, closed, bodyLineOffset)...)
 		default:
 			findings = append(findings, checkConceptFile(rel, fm, present, closed)...)
+			if present && closed {
+				findings = append(findings, checkPathFields(root, rel, parseFrontmatter(fm))...)
+			}
 		}
 
 		findings = append(findings, checkLinks(root, rel, body, bodyLineOffset)...)
@@ -106,18 +109,21 @@ func exitCode(r Result, strict bool) int {
 	return 0
 }
 
-// checkConceptFile applies SPEC §9.1/§9.2's frontmatter/type rules, which
-// apply only to non-reserved (concept) markdown files.
+// checkConceptFile applies SPEC §3.2/§4's frontmatter/type rules to
+// non-reserved markdown files. Since v0.3 a .md file without frontmatter
+// or without a scalar `type` is simply not a concept (§3.2, §11.1): it is
+// reported as a warning, not a conformance error. An unparseable
+// frontmatter block still fails §11.1.
 func checkConceptFile(rel string, fm []byte, present, closed bool) []Finding {
 	if !present {
 		return []Finding{{
-			Code: "frontmatter-missing", Level: LevelError, Spec: "SPEC §4.1, §9.1",
-			Path: rel, Line: 1, Message: "no frontmatter block found at the start of the file",
+			Code: "frontmatter-missing", Level: LevelWarn, Spec: "SPEC §3.2",
+			Path: rel, Line: 1, Message: "no frontmatter block found; the file is not a concept",
 		}}
 	}
 	if !closed {
 		return []Finding{{
-			Code: "frontmatter-invalid", Level: LevelError, Spec: "SPEC §4.1, §9.1",
+			Code: "frontmatter-invalid", Level: LevelError, Spec: "SPEC §4, §11.1",
 			Path: rel, Line: 1, Message: "frontmatter block is never closed with a matching '---'",
 		}}
 	}
@@ -126,7 +132,7 @@ func checkConceptFile(rel string, fm []byte, present, closed bool) []Finding {
 	pf := parseFrontmatter(fm)
 	if pf.Malformed {
 		out = append(out, Finding{
-			Code: "frontmatter-invalid", Level: LevelError, Spec: "SPEC §4.1, §9.1",
+			Code: "frontmatter-invalid", Level: LevelError, Spec: "SPEC §4, §11.1",
 			Path: rel, Line: 1, Message: "frontmatter block contains a line that could not be parsed",
 		})
 	}
@@ -135,19 +141,19 @@ func checkConceptFile(rel string, fm []byte, present, closed bool) []Finding {
 	switch {
 	case !hasType || (!typeVal.IsBlock && strings.TrimSpace(typeVal.Raw) == ""):
 		out = append(out, Finding{
-			Code: "type-missing", Level: LevelError, Spec: "SPEC §4.1, §9.2",
-			Path: rel, Line: fmLineToFileLine(typeVal.Line), Message: "frontmatter has no non-empty 'type' field",
+			Code: "type-missing", Level: LevelWarn, Spec: "SPEC §3.2, §4.1",
+			Path: rel, Line: fmLineToFileLine(typeVal.Line), Message: "frontmatter has no non-empty 'type' field; the file is not a concept",
 		})
 	case typeVal.IsBlock:
 		out = append(out, Finding{
-			Code: "type-invalid", Level: LevelError, Spec: "SPEC §4.1, §9.2",
-			Path: rel, Line: fmLineToFileLine(typeVal.Line), Message: "'type' must be a scalar string, not a list or mapping",
+			Code: "type-invalid", Level: LevelWarn, Spec: "SPEC §3.2, §4.1",
+			Path: rel, Line: fmLineToFileLine(typeVal.Line), Message: "'type' must be a scalar string, not a list or mapping; the file is not a concept",
 		})
 	}
 	return out
 }
 
-// checkIndexFile applies SPEC §6/§9.3/§11's index.md rules: frontmatter is
+// checkIndexFile applies SPEC §8's index.md rules: frontmatter is
 // permitted only on the bundle-root index.md, and the body should be
 // organized into heading sections.
 func checkIndexFile(rel string, isRoot bool, fm, body []byte, present, closed bool) []Finding {
@@ -156,18 +162,18 @@ func checkIndexFile(rel string, isRoot bool, fm, body []byte, present, closed bo
 		switch {
 		case !isRoot:
 			out = append(out, Finding{
-				Code: "index-frontmatter", Level: LevelError, Spec: "SPEC §6, §9.3, §11",
+				Code: "index-frontmatter", Level: LevelError, Spec: "SPEC §8",
 				Path: rel, Line: 1, Message: "index.md must not contain frontmatter except at the bundle root",
 			})
 		case !closed:
 			out = append(out, Finding{
-				Code: "frontmatter-invalid", Level: LevelError, Spec: "SPEC §4.1, §9.1",
+				Code: "frontmatter-invalid", Level: LevelError, Spec: "SPEC §4, §11.1",
 				Path: rel, Line: 1, Message: "frontmatter block is never closed with a matching '---'",
 			})
 		default:
 			if pf := parseFrontmatter(fm); pf.Malformed {
 				out = append(out, Finding{
-					Code: "frontmatter-invalid", Level: LevelError, Spec: "SPEC §4.1, §9.1",
+					Code: "frontmatter-invalid", Level: LevelError, Spec: "SPEC §4, §11.1",
 					Path: rel, Line: 1, Message: "frontmatter block contains a line that could not be parsed",
 				})
 			}
@@ -175,22 +181,20 @@ func checkIndexFile(rel string, isRoot bool, fm, body []byte, present, closed bo
 	}
 	if !hasHeadingSection(body) {
 		out = append(out, Finding{
-			Code: "index-no-sections", Level: LevelWarn, Spec: "SPEC §6 (descriptive)",
+			Code: "index-no-sections", Level: LevelWarn, Spec: "SPEC §8 (descriptive)",
 			Path: rel, Message: "index.md body has no '#' heading sections",
 		})
 	}
 	return out
 }
 
-// checkLogFile applies SPEC §7/§9.3's log.md rules: no frontmatter (an
-// extension beyond literal spec text, applied for consistency with
-// index.md — see design notes in the implementation plan), and ISO 8601
-// date headings.
+// checkLogFile applies SPEC §9's log.md rules: no frontmatter and ISO 8601
+// date headings, newest first.
 func checkLogFile(rel string, body []byte, present, closed bool, bodyLineOffset int) []Finding {
 	var out []Finding
 	if present {
 		out = append(out, Finding{
-			Code: "log-frontmatter", Level: LevelError, Spec: "SPEC §7, §9.3 (extension)",
+			Code: "log-frontmatter", Level: LevelError, Spec: "SPEC §9",
 			Path: rel, Line: 1, Message: "log.md must not contain a frontmatter block",
 		})
 		if !closed {
@@ -202,7 +206,7 @@ func checkLogFile(rel string, body []byte, present, closed bool, bodyLineOffset 
 	out = append(out, dateFindings...)
 	if !isNonIncreasing(dates) {
 		out = append(out, Finding{
-			Code: "log-not-newest-first", Level: LevelWarn, Spec: "SPEC §7 (descriptive)",
+			Code: "log-not-newest-first", Level: LevelWarn, Spec: "SPEC §9",
 			Path: rel, Message: "log.md date headings are not in newest-first order",
 		})
 	}
@@ -226,7 +230,7 @@ func scanLogDateHeadings(rel string, body []byte, bodyLineOffset int) ([]time.Ti
 		t, err := time.Parse("2006-01-02", text)
 		if err != nil {
 			findings = append(findings, Finding{
-				Code: "log-bad-date-heading", Level: LevelError, Spec: "SPEC §7, §9.3",
+				Code: "log-bad-date-heading", Level: LevelError, Spec: "SPEC §9",
 				Path: rel, Line: bodyLineOffset + i,
 				Message: fmt.Sprintf("log.md date heading %q is not a valid ISO 8601 YYYY-MM-DD date", text),
 			})
@@ -258,18 +262,26 @@ func hasHeadingSection(body []byte) bool {
 	return false
 }
 
-// checkRootIndexManifest applies the SKILL.md house convention that a
-// bundle-root index.md's frontmatter (when present) should include the
-// manifest fields that let an agent distinguish co-located bundles without
-// opening each one.
+// checkRootIndexManifest applies SPEC §8.1: a bundle-root index.md should
+// declare the current okf_version, and its title and description let an
+// agent choose between co-located bundles without opening each one.
 func checkRootIndexManifest(pf frontmatter) []Finding {
 	var out []Finding
-	for _, key := range []string{"okf_version", "type", "title", "tags"} {
+	if v, ok := pf.Keys["okf_version"]; ok && !v.IsBlock {
+		if ver := strings.Trim(strings.TrimSpace(v.Raw), `"'`); ver != "" && ver != specVersion {
+			out = append(out, Finding{
+				Code: "okf-version-old", Level: LevelWarn, Spec: "SPEC §12, §13",
+				Path: "index.md", Line: fmLineToFileLine(v.Line),
+				Message: fmt.Sprintf("okf_version is %q; this validator checks %q (see SPEC §13 for migration)", ver, specVersion),
+			})
+		}
+	}
+	for _, key := range []string{"okf_version", "title", "description"} {
 		v, ok := pf.Keys[key]
 		empty := !ok || (!v.IsBlock && strings.TrimSpace(v.Raw) == "")
 		if empty {
 			out = append(out, Finding{
-				Code: "root-index-missing-field", Level: LevelWarn, Spec: "SKILL.md manifest convention",
+				Code: "root-index-missing-field", Level: LevelWarn, Spec: "SPEC §8.1",
 				Path: "index.md", Message: fmt.Sprintf("root index.md frontmatter is missing recommended field %q", key),
 			})
 		}
@@ -277,7 +289,7 @@ func checkRootIndexManifest(pf frontmatter) []Finding {
 	return out
 }
 
-// --- Link scanning (SPEC §5) ---
+// --- Links and path fields (SPEC §6) ---
 
 type linkKind int
 
@@ -329,7 +341,7 @@ func linkTargetExists(bundleRoot, rel, target string, kind linkKind) bool {
 }
 
 // checkLinks scans a file's body for markdown links and applies SPEC
-// §5.1/§5.3 and the skill's relative-link preference. It is a line-based
+// §6.1 and the skill's relative-link preference. It is a line-based
 // regex scan, not a full CommonMark parser, so it can miss links split
 // across lines or ones appearing inside fenced code blocks — a known,
 // documented limitation acceptable for this tool's purpose.
@@ -348,18 +360,51 @@ func checkLinks(bundleRoot, rel string, body []byte, bodyLineOffset int) []Findi
 			fileLine := bodyLineOffset + i
 			if kind == linkAbsolute {
 				out = append(out, Finding{
-					Code: "absolute-link", Level: LevelWarn, Spec: "SPEC §5.1 vs. SKILL.md",
+					Code: "absolute-link", Level: LevelWarn, Spec: "SPEC §6.1 vs. SKILL.md",
 					Path: rel, Line: fileLine,
 					Message: fmt.Sprintf("link target %q uses the absolute bundle-relative form; the skill prefers relative links", target),
 				})
 			}
 			if !linkTargetExists(bundleRoot, rel, target, kind) {
 				out = append(out, Finding{
-					Code: "broken-link", Level: LevelWarn, Spec: "SPEC §5.3",
+					Code: "broken-link", Level: LevelWarn, Spec: "SPEC §6.1",
 					Path: rel, Line: fileLine,
 					Message: fmt.Sprintf("link target %q does not resolve to a file in the bundle", target),
 				})
 			}
+		}
+	}
+	return out
+}
+
+// pathFields are the top-level path fields (SPEC §6.2) the minimal
+// frontmatter parser can read. Nested ones (sources[].resource,
+// executor.resource, attester.resource) are not checked.
+var pathFields = []string{"resource", "superseded_by", "computation"}
+
+// checkPathFields flags the v0.3 breaking change (SPEC §13.1): a path field
+// without a leading "/" now resolves from the file's directory. A value
+// that only resolves from the bundle root was written v0.2-style.
+func checkPathFields(bundleRoot, rel string, pf frontmatter) []Finding {
+	var out []Finding
+	for _, key := range pathFields {
+		v, ok := pf.Keys[key]
+		if !ok || v.IsBlock {
+			continue
+		}
+		target := strings.Trim(strings.TrimSpace(v.Raw), `"'`)
+		if target == "" || strings.Contains(target, ":") || classifyLinkTarget(target) != linkRelative {
+			continue
+		}
+		if linkTargetExists(bundleRoot, rel, target, linkRelative) {
+			continue
+		}
+		if linkTargetExists(bundleRoot, rel, "/"+target, linkAbsolute) {
+			out = append(out, Finding{
+				Code: "path-field-root-relative", Level: LevelWarn, Spec: "SPEC §6.2, §13.1",
+				Path: rel, Line: fmLineToFileLine(v.Line),
+				Message: fmt.Sprintf("%s %q resolves only from the bundle root (v0.2 style); write it as %q", key, target, "/"+target),
+			})
 		}
 	}
 	return out

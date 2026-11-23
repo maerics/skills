@@ -1,8 +1,7 @@
 ---
-okf_version: "0.1"
-type: library
+okf_version: "0.3"
 title: toylib
-tags: [toylib]
+description: Knowledge about the toylib library.
 ---
 
 # Concepts

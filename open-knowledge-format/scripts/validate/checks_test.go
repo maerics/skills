@@ -116,10 +116,10 @@ func TestValidateBundleFixtures(t *testing.T) {
 	}{
 		{"testdata/valid-minimal", 0, 0, nil},
 		{"testdata/valid-nested", 0, 0, nil},
-		{"testdata/err-frontmatter-missing", 1, 0, []string{"frontmatter-missing"}},
+		{"testdata/warn-frontmatter-missing", 0, 1, []string{"frontmatter-missing"}},
 		{"testdata/err-frontmatter-invalid", 1, 0, []string{"frontmatter-invalid"}},
-		{"testdata/err-type-missing", 1, 0, []string{"type-missing"}},
-		{"testdata/err-type-invalid", 1, 0, []string{"type-invalid"}},
+		{"testdata/warn-type-missing", 0, 1, []string{"type-missing"}},
+		{"testdata/warn-type-invalid", 0, 1, []string{"type-invalid"}},
 		{"testdata/err-index-frontmatter-nonroot", 1, 0, []string{"index-frontmatter"}},
 		{"testdata/err-log-frontmatter", 1, 0, []string{"log-frontmatter"}},
 		{"testdata/err-log-bad-date", 1, 0, []string{"log-bad-date-heading"}},
@@ -130,6 +130,8 @@ func TestValidateBundleFixtures(t *testing.T) {
 		{"testdata/warn-log-missing", 0, 1, []string{"log-missing"}},
 		{"testdata/warn-index-no-sections", 0, 1, []string{"index-no-sections"}},
 		{"testdata/warn-log-not-newest-first", 0, 1, []string{"log-not-newest-first"}},
+		{"testdata/warn-okf-version-old", 0, 1, []string{"okf-version-old"}},
+		{"testdata/warn-path-field-root-relative", 0, 1, []string{"path-field-root-relative"}},
 	}
 
 	for _, tc := range cases {

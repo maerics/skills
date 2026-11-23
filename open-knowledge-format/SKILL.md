@@ -1,7 +1,7 @@
 ---
 name: open-knowledge-format
 description: >-
-  Read and write Open Knowledge Format (OKF) knowledge bundles — Google Cloud's
+  Read and write Open Knowledge Format (OKF) knowledge bundles — the
   vendor-neutral markdown + YAML spec for AI-agent knowledge bases. Use when
   reading project knowledge from a .okf/ (or explicitly named) directory,
   answering a question a curated knowledge base would cover, when asked to
@@ -13,17 +13,20 @@ description: >-
 
 # OKF: Open Knowledge Format
 
-The full, authoritative OKF v0.2 rules are in [SPEC.md](SPEC.md); read it
-before writing a bundle. The canonical source is
-https://github.com/GoogleCloudPlatform/open-knowledge-format/blob/main/SPEC.md.
+The full, authoritative OKF v0.3 rules are in [SPEC.md](SPEC.md); read it
+before writing a bundle (§13 summarizes changes from v0.2). The canonical
+source is
+https://github.com/open-knowledge-format/open-knowledge-format/blob/main/SPEC.md.
 This skill has exactly two operating modes: **read**
 (default) and **write** (everything else).
 
 A bundle is a tree of concept documents. Reserved filenames: `index.md`
-(directory listing) and `log.md` (update history). Every other `.md` file
-is a concept with a required `type` frontmatter field. Consume
+(directory listing) and `log.md` (update history). A `.md` file is a
+concept only if its frontmatter has a non-empty `type`; other `.md` files
+(`README.md`, `AGENTS.md`) are skipped, non-`.md` files are assets, and
+dot-paths are not part of the bundle (SPEC §3.2). Consume
 **permissively**: tolerate unknown types, extra keys, broken links, and
-missing index files (SPEC §11).
+missing index files (SPEC §11.2).
 
 ## Locating a bundle
 
@@ -40,15 +43,26 @@ Bundle root = the directory containing the top-level `index.md`, or the
 `.okf/` directory itself if there's no index — **never** the repo root,
 even when a bundle sits at or near it.
 
-## Cross-linking
+## Links and path fields
 
-SPEC §6 permits relative links (`./orders.md`) and absolute
-bundle-relative links (`/tables/orders.md`). Default to **relative**
-when writing: GitHub, VS Code, and `cat` resolve a leading `/` against
-the repo root, not the bundle root, so the absolute form only works by
-coincidence when they're the same directory — which co-location (above)
-makes the exception, not the rule. Still tolerate absolute links when
-reading; a differently-formed link isn't malformed (SPEC §9).
+SPEC §6 has one rule for both: a value starting with `/` resolves from
+the bundle root; anything else resolves from the containing file's
+directory. Both forms are valid and consumers must accept both.
+
+- **Body links: write relative** (`./orders.md`, `../tables/orders.md`).
+  GitHub, VS Code, and `cat` resolve a leading `/` against the repo root,
+  not the bundle root, so the absolute form only works by coincidence —
+  which co-location (above) makes the exception, not the rule.
+- **Path fields: write in-bundle values with a leading `/`**
+  (`superseded_by: /metrics/gross-margin.md`). Path fields are `resource`,
+  `sources[].resource`, `superseded_by`, `computation`,
+  `executor.resource`, and `attester.resource` (§6.2). Frontmatter isn't
+  rendered as links, so the repo-root problem doesn't apply, and this
+  matches the spec's examples.
+- **Reading a v0.2-or-older bundle** (or one with no `okf_version`): a
+  bare path field that doesn't resolve from its file's directory may be
+  resolved from the bundle root instead (§12.1). This is the main v0.3
+  breaking change.
 
 ## Read mode (default)
 
@@ -75,6 +89,14 @@ read-mode ask, proceed as below and just mention the viewer as an option.
    footnote attribution; for legacy v0.1 documents, also read `# Citations`.
    Surface sources when they back a claim.
 4. Treat a broken link as not-yet-written knowledge, not an error.
+5. Weigh lifecycle and trust signals when they're present (§5):
+   - `status: deprecated` is not current; follow `superseded_by`. An
+     unknown `status` value is not `stable` either.
+   - Past `stale_after` means "needs re-checking", not "false". An
+     unparseable `stale_after` is never fresh.
+   - Trust tier counts only **current** `verified` events (`at` >=
+     `generated.at`): any `human:` actor => human-reviewed, otherwise
+     machine-confirmed, none => unverified. Older events are history.
 
 ## Write mode (everything else)
 
@@ -91,16 +113,22 @@ yourself; don't ask the user to choose between bootstrap and update:
    subdirectories that fit the domain.
 3. Each concept: required `type`; recommended `title`, `description`,
    `resource` (when it maps to a real asset), and `tags`. Record authorship
-   and edit time with `generated: { by: <actor>, at: <RFC 3339 datetime> }`;
-   use actor forms from SPEC §7. Add `sources` with stable `id` values and
-   keyed footnotes when claims derive from references. Use `verified`,
-   `status`, and `stale_after` when useful; these are optional signals.
-   Favor structured markdown (tables, `# Schema`, `# Examples`).
-4. Cross-link with relative links (`../tables/orders.md`, `./orders.md`) —
-   see Cross-linking above.
-5. Write a root `index.md`; its optional frontmatter may contain only
-   `okf_version: "0.2"`. Write per-directory `index.md` files with no
-   frontmatter. Each index groups links under descriptive headings and
+   and edit time with `generated: { by: <actor>, at: "<RFC 3339 datetime
+   with offset>" }`; use actor forms from SPEC §7 (`<producer>/<version>`,
+   `human:<id>`, `team:<id>`). Add `sources` (each entry needs `resource`)
+   with stable `id` values and keyed footnotes when claims derive from
+   references. Use `verified` (each event needs `by` and `at`), `status`,
+   and `stale_after` when useful; never invent a `stale_after` date. Name
+   any custom keys `x-<producer>-<name>`. Quote values that look like
+   numbers or booleans. Favor structured markdown (tables, `# Schema`,
+   `# Examples`); the body dialect is CommonMark + GFM tables + footnotes.
+4. Cross-link per Links and path fields above: relative body links,
+   `/`-prefixed in-bundle path fields.
+5. Write a root `index.md` with frontmatter `okf_version: "0.3"`, `title`,
+   and a one-sentence `description` of the bundle's scope and when to use
+   it; add `license` (SPDX id or path) if known (§8.1). Write
+   per-directory `index.md` files with no frontmatter. Each index groups
+   links under descriptive headings and
    includes concept descriptions. When an
    index's concepts form a real graph (a pipeline's stage order, a state
    machine, service dependencies), add a fenced `mermaid` block there
@@ -116,7 +144,8 @@ yourself; don't ask the user to choose between bootstrap and update:
    When the concepts are independent (no shared order or dependency
    between them), skip the diagram entirely — forcing one onto unrelated
    concepts is worse than not having one.
-6. Write `log.md` with today's date and an `**Initialization**` entry.
+6. Write `log.md` (no frontmatter) with today's date and an
+   `**Initialization**` entry.
 
 ### B. Update (bundle exists)
 
@@ -150,13 +179,29 @@ bundle size:
    into its subdirectories, and don't mention it in the report.
 4. **Otherwise, descend and reconcile only that subtree**: update the
    concept docs whose subjects changed, preserve unknown frontmatter keys
-   when round-tripping (§4.1), refresh that directory's `index.md`, bump
-   each touched concept's `generated.at`, and prepend a dated entry
+   when round-tripping (§4.1), refresh that directory's `index.md` while
+   keeping the root `index.md` frontmatter (§8.1), bump each touched
+   concept's `generated.at`, and prepend a dated entry
    (`**Update**`, `**Creation**`, `**Deprecation**`) to that directory's
    `log.md` — newest first (SPEC §9), above any existing entries. Compare
    source changes with `generated.at`, falling back to legacy `timestamp`
-   for v0.1 concepts. On edits, refresh `generated.at` and preserve the
-   original `generated.by` when the same producer makes the change.
+   for v0.1 concepts. Bump `generated.at` only for meaningful content
+   changes — not formatting, whitespace, or link repair — and preserve the
+   original `generated.by` when the same producer makes the change. Don't
+   re-serialize values you didn't change, and don't delete old `verified`
+   events; they simply stop counting (§5.3).
+
+**Retire or move** a concept by keeping the file with `status:
+deprecated` and `superseded_by: /<new path>.md`; on a move, leave that
+short deprecated stub at the old path so existing links keep working
+(§5.4).
+
+**Migrating an older bundle**: when you touch a bundle whose root
+`index.md` declares `okf_version` below `"0.3"` (or none), bump it to
+`"0.3"`, add `title`/`description` if missing, rewrite bare in-bundle path
+fields that only resolve from the bundle root to the `/` form, and log it
+as an `**Update**`. The validator's `path-field-root-relative` and
+`okf-version-old` warnings find these.
 
 If the repo is not under git, skip the git comparisons and rely on
 `log.md` dates and `generated.at` fields (or legacy `timestamp`) alone.
@@ -166,10 +211,12 @@ If the repo is not under git, skip the git comparisons and rely on
 - [ ] Broad updates: recency gate applied first; current subtrees left
       untouched.
 - [ ] Unknown pre-existing frontmatter keys preserved when round-tripping.
-- [ ] v0.2 fields are used correctly: `generated.at` for edit time,
-      `sources` for provenance, and `verified` as verification events.
+- [ ] v0.3 fields are used correctly: `generated.at` for the last
+      meaningful change, `sources` for provenance, `verified` events with
+      both `by` and `at`, timestamps with an explicit offset.
+- [ ] In-bundle path fields use a leading `/`; body links are relative.
 - [ ] Run the bundled structural validator (see Validation below); it
-      does not check every v0.2 field or attested computation contract.
+      does not check every v0.3 field or attested computation contract.
 
 ## Validation
 
@@ -187,14 +234,14 @@ from any working directory and needs nothing but a Go toolchain — no build
 step, no dependencies to fetch. It prints a JSON report
 (`conformant`, `counts`, `findings`) and exits non-zero when the bundle has
 structural errors detected by its current checks or, with `-strict`, when
-it finds house-convention warnings. It is not a complete v0.2 validator:
+it finds house-convention warnings. It is not a complete v0.3 validator:
 in particular, it does not validate provenance, trust, lifecycle, or
 attested computation fields. Treat its report as a partial check, not proof
 of full SPEC conformance.
 
 ## Reference
 
-- [SPEC.md](SPEC.md) — the full OKF v0.2 specification.
+- [SPEC.md](SPEC.md) — the full OKF v0.3 specification.
 - Terminology, conformance, citations, and versioning all live in SPEC.md;
   consult it rather than guessing.
 - [scripts/validate/README.md](scripts/validate/README.md) — the bundled

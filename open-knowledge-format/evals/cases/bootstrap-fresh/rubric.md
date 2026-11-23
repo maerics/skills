@@ -1,7 +1,7 @@
 Pass only if all of the following hold:
 
-- `.okf/index.md` exists with frontmatter including `okf_version: "0.1"` and a
-  `type`.
+- `.okf/index.md` exists with frontmatter including `okf_version: "0.3"`, a
+  `title`, and a `description`.
 - At least one concept doc under `.okf/` documents `add.go` / the `Add`
   function (not just restates the README verbatim).
 - `.okf/log.md` exists, dated today, with an **Initialization** entry.

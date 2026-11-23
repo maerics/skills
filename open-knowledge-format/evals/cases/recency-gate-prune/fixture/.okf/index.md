@@ -1,8 +1,7 @@
 ---
-okf_version: "0.1"
-type: service
+okf_version: "0.3"
 title: shop
-tags: [shop]
+description: Knowledge about the shop service.
 ---
 
 # Sections

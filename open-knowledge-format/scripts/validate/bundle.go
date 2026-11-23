@@ -10,6 +10,9 @@ import (
 	"strings"
 )
 
+// specVersion is the OKF version this validator checks against.
+const specVersion = "0.3"
+
 // Level is the severity of a Finding.
 type Level string
 
@@ -67,8 +70,9 @@ func resolveBundleRoot(path string) (string, error) {
 }
 
 // walkMarkdownFiles returns every *.md file under root, as sorted,
-// root-relative, forward-slash paths. Directories other than root itself
-// whose base name starts with "." are skipped.
+// root-relative, forward-slash paths. Files and directories (other than
+// root itself) whose base name starts with "." are not part of the bundle
+// (SPEC §3.2).
 func walkMarkdownFiles(root string) ([]string, error) {
 	var out []string
 	err := filepath.WalkDir(root, func(p string, d os.DirEntry, err error) error {
@@ -81,7 +85,7 @@ func walkMarkdownFiles(root string) ([]string, error) {
 			}
 			return nil
 		}
-		if !strings.HasSuffix(d.Name(), ".md") {
+		if strings.HasPrefix(d.Name(), ".") || !strings.HasSuffix(d.Name(), ".md") {
 			return nil
 		}
 		rel, err := filepath.Rel(root, p)

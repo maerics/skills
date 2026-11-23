@@ -1,8 +1,7 @@
 ---
-okf_version: "0.1"
-type: library
+okf_version: "0.3"
 title: Fixture
-tags: [test]
+description: Test fixture.
 ---
 
 # Index
